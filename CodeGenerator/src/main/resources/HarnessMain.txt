@@ -56,7 +56,7 @@
         """
         Called by the PLP when it should have delivered an estimation, but there is not enough data (missing parameter)
         """
-        self.publisher.publish(PLPMessage(None, "%1$s", "info", "<PLP:%1$s> triggered, but its missing some data"))
+        self.publisher.publish(PLPMessage("%1$s", "info", "<PLP:%1$s> triggered, but its missing some data"))
 
     def plp_monitor_message(self, message):
         self.publisher.publish(
