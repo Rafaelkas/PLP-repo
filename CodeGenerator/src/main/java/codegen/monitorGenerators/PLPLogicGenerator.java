@@ -57,7 +57,7 @@ public class PLPLogicGenerator {
         generator.write("# Access constants using: self.constants[constant_name]");
         generateAllConditionCheckers(generator, plp, true);
 
-        // validate preconditions
+	// validate preconditions
         generator.newLine();
         generator.writeLine("def validate_preconditions(self):");
         generator.indent();
@@ -67,6 +67,11 @@ public class PLPLogicGenerator {
         }
         else if (plp.getPreConditions().size() == 1) {
             generator.writeLine("return " + generateIFcondition(plp.getPreConditions().get(0)));
+        }
+        else
+        {
+            generator.writeLine("# no preconditions defined in the plp");
+            generator.writeLine("return True");
         }
         generator.dendent();
         //
@@ -80,7 +85,7 @@ public class PLPLogicGenerator {
         generateTerminationDetectors(generator, plp, true);
         //
 
-        // concurrency conditions
+	// concurrency conditions
         generator.newLine();
         generator.writeLine("def monitor_conditions(self):");
         generator.indent();
@@ -97,8 +102,14 @@ public class PLPLogicGenerator {
         else if (plp.getConcurrencyConditions().size() == 1) {
             generator.writeLine("return " + generateIFcondition(plp.getConcurrencyConditions().get(0)));
         }*/
-        generator.dendent();
-        generator.newLine();
+        if (plp.getConcurrencyConditions().size() == 0) {
+            generator.dendent();
+            generator.indent();
+            generator.writeLine("# no ConcurrencyConditions defined in the plp");
+            generator.writeLine("return None");
+            generator.dendent();
+            generator.newLine();
+        }
         //
 
         // Maintain: maintained condition
