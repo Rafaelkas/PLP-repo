@@ -110,7 +110,7 @@ public class PLPHarnessGenerator {
             generateParameterUpdateFunction(generator, param, false, true, true);
         }
 
-        // trigger function
+	// trigger function
         generator.writeLine("def check_trigger(self):");
         generator.indent();
         generator.writeLine("# The execution parameters are considered the trigger");
@@ -118,13 +118,18 @@ public class PLPHarnessGenerator {
         generator.writeLine("# You can also use the defined constants using self.plp_constants[<constant_name>]");
         generator.writeLine(String.format("# (All the parameters are defined in PLP_%s_classes.py)",plp.getBaseName()));
         StringBuilder triggerCheck = new StringBuilder();
-        triggerCheck.append("return not (");
-        for (PLPParameter param : plp.getExecParams()) {
-            triggerCheck.append(String.format("(self.plp_params.%s is None) or ",param.simpleString()));
+        if(plp.getExecParams().size()>0) {
+            triggerCheck.append("return not (");
+            for (PLPParameter param : plp.getExecParams()) {
+                triggerCheck.append(String.format("(self.plp_params.%s is None) or ", param.simpleString()));
+            }
+            triggerCheck.delete(triggerCheck.length() - 4, triggerCheck.length());
+            triggerCheck.append(")");
         }
-        // TODO: check if no params
-        triggerCheck.delete(triggerCheck.length()-4,triggerCheck.length());
-        triggerCheck.append(")");
+        else
+        {
+            generator.writeLine("# TODO: decide the trigger for the code module");
+        }
         generator.writeLine(triggerCheck.toString());
         generator.dendent();
         generator.newLine();
