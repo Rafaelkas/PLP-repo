@@ -216,6 +216,12 @@ public class PLPLogicGenerator {
             generator.writeLine("def variables(self):");
             generator.indent();
             generator.writeLine("# The newest variables");
+            generator.writeLine("if not self.variables_history:");
+            generator.indent();
+            generator.writeLine("return None");
+            generator.dendent();
+            generator.writeLine("else:");
+            generator.indent();
             generator.writeLine("return self.variables_history[0]");
         }
         else {
