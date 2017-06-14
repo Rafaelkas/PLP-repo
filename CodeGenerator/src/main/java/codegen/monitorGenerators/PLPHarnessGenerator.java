@@ -110,7 +110,7 @@ public class PLPHarnessGenerator {
             generateParameterUpdateFunction(generator, param, false, true, true);
         }
 
-	// trigger function
+        // trigger function
         generator.writeLine("def check_trigger(self):");
         generator.indent();
         generator.writeLine("# The execution parameters are considered the trigger");
