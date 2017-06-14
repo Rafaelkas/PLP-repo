@@ -57,7 +57,7 @@ public class PLPLogicGenerator {
         generator.write("# Access constants using: self.constants[constant_name]");
         generateAllConditionCheckers(generator, plp, true);
 
-	// validate preconditions
+        // validate preconditions
         generator.newLine();
         generator.writeLine("def validate_preconditions(self):");
         generator.indent();
@@ -85,7 +85,7 @@ public class PLPLogicGenerator {
         generateTerminationDetectors(generator, plp, true);
         //
 
-	// concurrency conditions
+        // concurrency conditions
         generator.newLine();
         generator.writeLine("def monitor_conditions(self):");
         generator.indent();
@@ -229,7 +229,7 @@ public class PLPLogicGenerator {
                 generator.writeLine(String.format("self.plp_vars.%1$s = self.calc_%1$s()",var.getName()));
             }
         }
-
+        generator.dendent();
         generator.dendent();
 
         generator.newLine();
@@ -243,7 +243,7 @@ public class PLPLogicGenerator {
             generator.writeLine(String.format("def calc_%s(self):",var.getName()));
             generator.indent();
             generator.writeLine("# TODO Implement code to calculate "+var.getName());
-            generator.writeLine("# return the value of the variable ");
+            generator.writeLine("# return the value of the variable");
             generator.writeLine("return None");
             generator.dendent();
             generator.newLine();
@@ -958,10 +958,10 @@ public class PLPLogicGenerator {
                 || QuantifiedCondition.class.isInstance(condition)) {
             if (conditionMethods.get(condition).equals("uncomputable"))
                 return "(False)";
-            return "(self." + conditionMethods.get(condition).replaceAll("self","") + ")";
+            return "self." + conditionMethods.get(condition).replaceAll("self","");
         }
         else if (NotCondition.class.isInstance(condition)) {
-            return "(not " + generateIFcondition(((NotCondition) condition).getCondition()) + ")";
+            return "not " + generateIFcondition(((NotCondition) condition).getCondition());
         }
         else if (BitwiseOperation.class.isInstance(condition)) {
             BitwiseOperation bOP = (BitwiseOperation) condition;
