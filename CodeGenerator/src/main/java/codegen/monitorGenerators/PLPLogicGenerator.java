@@ -107,7 +107,6 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# no ConcurrencyConditions defined in the plp");
             generator.writeLine("return None");
-            generator.dendent();
             generator.newLine();
         }
         generator.dendent();
