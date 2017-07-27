@@ -110,6 +110,7 @@ public class PLPLogicGenerator {
             generator.dendent();
             generator.newLine();
         }
+        generator.dendent();
         //
 
         // Maintain: maintained condition
