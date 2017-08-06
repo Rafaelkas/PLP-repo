@@ -1,4 +1,3 @@
-
         if self.monitor:
             rospy.loginfo("<PLP:%1$s>: Monitoring")
         if self.capture:
@@ -26,7 +25,6 @@
                 self.triggered = True
                 self.capture_params()
 
-
     # PLP Callback methods
     def plp_terminated(self, plp_termination):
         """
@@ -35,12 +33,20 @@
         :param plp_termination: The termination message sent from the PLP.
         """
         rospy.loginfo("<PLP:%1$s> terminated")
-
+        logger.info("%1$s: Time " + str(rospy.Time.now().to_sec() - self.plp_params.timer_start))
         if plp_termination.is_success():
+            logger.info("%1$s: Result Success")
             msg = "Success"
         else:
+            logger.info('%1$s: Result Failure')
             msg = "Failure occurred " + plp_termination.get_message()
-
+        newDict = {}
+        with open("/var/tmp/%1$s.log", 'r') as f:
+            for line in f:
+                if "%1$s" in line:
+                    splitLine = line.split()
+                    newDict[splitLine[4]] = ",".join(splitLine[5:])
+        rospy.loginfo(newDict)
         self.publisher.publish(
             PLPMessage("%1$s", "%2$s", msg))
         self.reset_harness_data()

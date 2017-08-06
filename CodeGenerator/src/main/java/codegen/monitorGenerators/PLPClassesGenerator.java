@@ -24,6 +24,7 @@ public class PLPClassesGenerator {
         generator.writeLine("def __init__(self):");
         generator.indent();
         generator.writeLine("self.callback = None");
+        generator.writeLine("self.timer_start = None");
         generator.writeLine("# Execution Parameters");
         for (PLPParameter p : plp.getExecParams()) {
             generator.writeLine(String.format("self.%s = None", p.simpleString()));

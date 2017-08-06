@@ -107,10 +107,10 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# no ConcurrencyConditions defined in the plp");
             generator.writeLine("return None");
-            generator.newLine();
+            //generator.newLine();
         }
+        generator.newLine();
         generator.dendent();
-        //
 
         // Maintain: maintained condition
         if (plp.getClass().isAssignableFrom(MaintainPLP.class)) {

@@ -30,6 +30,7 @@ public class PLPHarnessGenerator {
         generator.writeLine("#!/usr/bin/env python");
         generator.writeLine("import rospy");
         generator.writeLine("import sys");
+        generator.writeLine("import logging");
 
         generator.newLine();
         handleGlueFile(generator, plp, path);
@@ -39,7 +40,7 @@ public class PLPHarnessGenerator {
         generator.writeLine(String.format("from PLP_%s_classes import *",plp.getBaseName()));
         generator.newLine();
         generator.writeLine(String.format("PLP_TOPIC = \"%s\"",CodeGenerator.outputTopic));
-
+        generator.writeLine(String.format("logger = logging.getLogger(\"%s\")",plp.getBaseName()));
         generator.newLine();
         generator.writeLine(String.format("class PLP_%s_ros_harness(object):",plp.getBaseName()));
         generator.indent();
@@ -68,6 +69,8 @@ public class PLPHarnessGenerator {
         generator.writeLine("def trigger_plp_task(self):");
         generator.indent();
         generator.writeLine("# Creates a PLP and starts the monitoring, if there's no PLP yet.");
+        generator.writeLine(String.format("logger.info('%s: trigger start')",plp.getBaseName()));
+        generator.writeLine("self.plp_params.timer_start = rospy.Time.now().to_sec()");
         generator.writeLine(String.format("rospy.loginfo(\"<PLP:%s> trigger detected, starting \" + \"monitoring\" if self.monitor else \"capturing\")",plp.getBaseName()));
         generator.writeLine(String.format("self.plp = PLP_%s_logic(self.plp_constants, self.plp_params, self)",plp.getBaseName()));
         generator.writeLine("self.plp_params.callback = self.plp");
@@ -179,6 +182,12 @@ public class PLPHarnessGenerator {
         generator.writeLine("# Setup internal PLP objects.");
         generator.writeLine("self.plp = None");
         generator.writeLine(String.format("self.plp_params = PLP_%s_parameters()",plp.getBaseName()));
+        generator.newLine();
+        generator.writeLine("# Defined Logging");
+        generator.writeLine(String.format("hdlr = logging.FileHandler('/var/tmp/%s.log')",plp.getBaseName()));
+        generator.writeLine("formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')");
+        generator.writeLine("hdlr.setFormatter(formatter)");
+        generator.writeLine("logger.addHandler(hdlr)");
         generator.newLine();
         generator.writeFileContent(PLPHarnessGenerator.class.getResource("/HarnessInit.txt").getPath());
         generator.newLine();
