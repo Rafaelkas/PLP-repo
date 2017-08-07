@@ -33,20 +33,23 @@
         :param plp_termination: The termination message sent from the PLP.
         """
         rospy.loginfo("<PLP:%1$s> terminated")
-        logger.info("%1$s: Time " + str(rospy.Time.now().to_sec() - self.plp_params.timer_start))
         if plp_termination.is_success():
-            logger.info("%1$s: Result Success")
             msg = "Success"
         else:
-            logger.info('%1$s: Result Failure')
-            msg = "Failure occurred " + plp_termination.get_message()
-        newDict = {}
+            msg = "Failure occurred" + plp_termination.get_message()
+        logger.info("%1$s: Time " + str(rospy.Time.now().to_sec() - self.plp_params.timer_start) + " Result " + msg)
+        time = []
+        success = []
         with open("/var/tmp/%1$s.log", 'r') as f:
             for line in f:
-                if "%1$s" in line:
-                    splitLine = line.split()
-                    newDict[splitLine[4]] = ",".join(splitLine[5:])
-        rospy.loginfo(newDict)
+                if "Time" in line:
+                    time.append(float(line.split()[5]))
+                    if "Success" in line.split()[7]:
+                        success.append(float(1))
+                    else:
+                        success.append(0)
+        rospy.loginfo("Average Time: " + str(sum(time) / len(time)))
+        rospy.loginfo("Average Success: " + str((sum(success) / len(success))*100))
         self.publisher.publish(
             PLPMessage("%1$s", "%2$s", msg))
         self.reset_harness_data()
