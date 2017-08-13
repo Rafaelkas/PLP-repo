@@ -37,19 +37,26 @@
             msg = "Success"
         else:
             msg = "Failure occurred" + plp_termination.get_message()
-        logger.info("%1$s: Time " + str(rospy.Time.now().to_sec() - self.plp_params.timer_start) + " Result " + msg)
-        time = []
+        logger.info("%1$s: Time " + str(rospy.Time.now().to_sec() - self.plp_params.timer_start) + " " + msg)
+        time_success = []
+        time_failure = []
         success = []
         with open("/var/tmp/%1$s.log", 'r') as f:
             for line in f:
                 if "Time" in line:
-                    time.append(float(line.split()[5]))
-                    if "Success" in line.split()[7]:
+                    if "Success" in line.split()[6]:
+                        time_success.append(float(line.split()[5]))
                         success.append(float(1))
                     else:
+                        time_failure.append(float(line.split()[5]))
                         success.append(0)
-        rospy.loginfo("Average Time: " + str(sum(time) / len(time)))
-        rospy.loginfo("Average Success: " + str((sum(success) / len(success))*100))
+        if len(time_success) > 0:
+            msg += " Average Time Success: " + str(sum(time_success) / len(time_success))
+        if len(time_failure) > 0:
+            msg += " Average Time Failure: " + str(sum(time_failure) / len(time_failure))
+        if len(success) > 0:
+            msg += " Average Success: " + str((sum(success) / len(success)) * 100)
+
         self.publisher.publish(
             PLPMessage("%1$s", "%2$s", msg))
         self.reset_harness_data()
