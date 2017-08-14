@@ -56,7 +56,6 @@
             msg += " Average Time Failure: " + str(sum(time_failure) / len(time_failure))
         if len(success) > 0:
             msg += " Average Success: " + str((sum(success) / len(success)) * 100)
-
         self.publisher.publish(
             PLPMessage("%1$s", "%2$s", msg))
         self.reset_harness_data()
@@ -72,7 +71,9 @@
         """
         Called by the PLP when it should have delivered an estimation, but there is not enough data (missing parameter)
         """
-        self.publisher.publish(PLPMessage("%1$s", "info", "<PLP:%1$s> triggered, but its missing some data"))
+        msg = "<PLP:%1$s> triggered, but its missing some data"
+        logger.info("%1$s: Time " + str(rospy.Time.now().to_sec() - self.plp_params.timer_start) + " " + msg)
+        self.publisher.publish(PLPMessage("%1$s", "info", msg))
 
     def plp_monitor_message(self, message):
         self.publisher.publish(
