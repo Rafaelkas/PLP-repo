@@ -25,6 +25,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("from PLPClasses import *");
         generator.writeLine(String.format("from PLP_%s_classes import *",plp.getBaseName()));
+        generator.writeLine("from xml.dom import minidom");
         generator.newLine();
         generator.writeLine("# TODO update this variable to the max variable history needed");
         generator.writeLine(String.format("PLP_%s_HISTORY_LENGTH = 2",plp.getBaseName()));
@@ -475,7 +476,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_success(self):");
         generator.indent();
-        writeBodyEstimateProb(aplp.getSuccessProb(), generator);
+        writeBodyEstimateProb(aplp, aplp.getSuccessProb(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -492,7 +493,7 @@ public class PLPLogicGenerator {
         else {
             generator.writeLine("def estimate_failure(self):");
             generator.indent();
-            writeBodyEstimateProb(aplp.getGeneralFailureProb(), generator);
+            writeBodyEstimateProb(aplp, aplp.getGeneralFailureProb(), generator);
             generator.dendent();
             generator.newLine();
         }
@@ -526,7 +527,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_success(self):");
         generator.indent();
-        writeBodyEstimateProb(mplp.getSuccessProb(), generator);
+        writeBodyEstimateProb(mplp, mplp.getSuccessProb(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -543,7 +544,7 @@ public class PLPLogicGenerator {
         else {
             generator.writeLine("def estimate_failure(self):");
             generator.indent();
-            writeBodyEstimateProb(mplp.getGeneralFailureProb(), generator);
+            writeBodyEstimateProb(mplp, mplp.getGeneralFailureProb(), generator);
             generator.dendent();
             generator.newLine();
         }
@@ -579,7 +580,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_correct_observation(self):");
         generator.indent();
-        writeBodyEstimateProb(oplp.getCorrectObservationProb(), generator);
+        writeBodyEstimateProb(oplp, oplp.getCorrectObservationProb(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -593,7 +594,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_failure_to_observe(self):");
         generator.indent();
-        writeBodyEstimateProb(oplp.getFailureToObserveProb(),generator);
+        writeBodyEstimateProb(oplp, oplp.getFailureToObserveProb(),generator);
         generator.dendent();
         generator.newLine();
 
@@ -617,7 +618,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_detection_given_condition_prob(self):");
         generator.indent();
-        writeBodyEstimateProb(dplp.getSuccessProbGivenCondition(), generator);
+        writeBodyEstimateProb(dplp, dplp.getSuccessProbGivenCondition(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -694,7 +695,7 @@ public class PLPLogicGenerator {
         generator.writeLine("return result");
     }
 
-    private static void writeBodyEstimateProb(List<ConditionalProb> probs, PythonWriter generator) {
+    private static void writeBodyEstimateProb(PLP plp, List<ConditionalProb> probs, PythonWriter generator) {
         generator.writeLine("result = \"\"");
         for (ConditionalProb cProb : probs) {
             if (cProb.isConditional()) {
@@ -702,8 +703,23 @@ public class PLPLogicGenerator {
             }
             else {
                 generator.writeLine("# TODO Implement the code that computes and returns the following probability");
-                generator.writeLine("# probability = " + cProb.getProb().toString());
-                generator.writeLine("result = to_implement");
+                generator.writeLine("# first defined probability = " + cProb.getProb().toString());
+                generator.writeLine(String.format("xml = minidom.parse('../xml/%s.xml')",plp.getBaseName()));
+                generator.writeLine("parent = xml.getElementsByTagName(\"success_probability\")");
+                generator.writeLine("if parent:");
+                generator.indent();
+                generator.writeLine("for item in parent:");
+                generator.indent();
+                generator.writeLine("for child in item.getElementsByTagName('probability'):");
+                generator.indent();
+                generator.writeLine("result = child.getAttribute('value')");
+                generator.dendent();
+                generator.dendent();
+                generator.dendent();
+                generator.writeLine("else:");
+                generator.indent();
+                generator.writeLine("result = \"" + cProb.getProb().toString()+"\"");
+                generator.dendent();
             }
         }
         generator.writeLine("return result");

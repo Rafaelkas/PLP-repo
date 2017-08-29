@@ -31,6 +31,7 @@ public class PLPHarnessGenerator {
         generator.writeLine("import rospy");
         generator.writeLine("import sys");
         generator.writeLine("import logging");
+        generator.writeLine("from xml.dom import minidom");
 
         generator.newLine();
         handleGlueFile(generator, plp, path);
@@ -69,7 +70,9 @@ public class PLPHarnessGenerator {
         generator.writeLine("def trigger_plp_task(self):");
         generator.indent();
         generator.writeLine("# Creates a PLP and starts the monitoring, if there's no PLP yet.");
+        generator.writeLine("# Write to logger that trigger start");
         generator.writeLine(String.format("logger.info('%s: trigger start')",plp.getBaseName()));
+        generator.writeLine("# Start timer");
         generator.writeLine("self.plp_params.timer_start = rospy.Time.now().to_sec()");
         generator.writeLine(String.format("rospy.loginfo(\"<PLP:%s> trigger detected, starting \" + \"monitoring\" if self.monitor else \"capturing\")",plp.getBaseName()));
         generator.writeLine(String.format("self.plp = PLP_%s_logic(self.plp_constants, self.plp_params, self)",plp.getBaseName()));

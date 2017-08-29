@@ -37,10 +37,10 @@
             msg = "Success"
         else:
             msg = "Failure occurred" + plp_termination.get_message()
+        # Write to logger
         logger.info("%1$s: Time " + str(rospy.Time.now().to_sec() - self.plp_params.timer_start) + " " + msg)
-        time_success = []
-        time_failure = []
-        success = []
+        # Calculate averages
+        time_success, time_failure, success = [], [], []
         with open("/var/tmp/%1$s.log", 'r') as f:
             for line in f:
                 if "Time" in line:
@@ -55,7 +55,18 @@
         if len(time_failure) > 0:
             msg += " Average Time Failure: " + str(sum(time_failure) / len(time_failure))
         if len(success) > 0:
-            msg += " Average Success: " + str((sum(success) / len(success)) * 100)
+            average = sum(success) / len(success)
+            msg += " Average Success: " + str(average * 100)
+        # Write to xml
+        xml = minidom.parse('../xml/%1$s.xml')
+        parent = xml.getElementsByTagName("success_probability")
+        if parent:
+            for item in parent:
+                for child in item.getElementsByTagName('probability'):
+                    child.attributes["value"].value = str("%%.2f" %% average)
+        with open("../xml/%1$s.xml", "wb") as f:
+            xml.writexml(f, encoding="utf-8")
+        # Publish msg
         self.publisher.publish(
             PLPMessage("%1$s", "%2$s", msg))
         self.reset_harness_data()
