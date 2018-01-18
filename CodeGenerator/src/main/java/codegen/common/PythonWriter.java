@@ -49,10 +49,11 @@ public class PythonWriter {
         codeBuilder.append(block);
     }
 
-    public void writeFileContent(String path, String... formatParams) {
+    public void writeFileContent(InputStream path, String... formatParams) {
         try {
-            FileReader fileReader = new FileReader(path);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            //System.out.println(path);
+            //FileReader fileReader = new FileReader(path);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(path));
             String line;
             StringBuilder text = new StringBuilder();
             while((line = bufferedReader.readLine()) != null) {

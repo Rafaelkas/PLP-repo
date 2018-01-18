@@ -48,9 +48,7 @@ public class PLPHarnessGenerator {
         generator.newLine();
         generateInitFunction(generator,plp);
 
-
-        generator.writeFileContent(PLPHarnessGenerator.class.getResource("/HarnessMain.txt").getPath(),
-                plp.getBaseName(), plp.getClass().getSimpleName());
+        generator.writeFileContent(PLPHarnessGenerator.class.getResourceAsStream("/HarnessMain.txt"), plp.getBaseName(), plp.getClass().getSimpleName());
 
         generator.dendent();
         generator.writeLine("def reset_harness_data(self):");
@@ -192,7 +190,7 @@ public class PLPHarnessGenerator {
         generator.writeLine("hdlr.setFormatter(formatter)");
         generator.writeLine("logger.addHandler(hdlr)");
         generator.newLine();
-        generator.writeFileContent(PLPHarnessGenerator.class.getResource("/HarnessInit.txt").getPath());
+        generator.writeFileContent(PLPHarnessGenerator.class.getResourceAsStream("/HarnessInit.txt"));
         generator.newLine();
         generator.writeLine("self.triggered = False");
         generator.newLine();

@@ -43,7 +43,7 @@ public class PLPLogicGenerator {
         }
         generator.dendent();
         generator.dendent();
-        generator.writeFileContent(PLPLogicGenerator.class.getResource("/PLPModuleHead.txt").getPath());
+        generator.writeFileContent(PLPLogicGenerator.class.getResourceAsStream("/PLPModuleHead.txt"));
         generator.newLine();
         generator.indent();
 
