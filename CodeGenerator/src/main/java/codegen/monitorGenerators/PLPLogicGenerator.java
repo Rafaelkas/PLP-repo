@@ -19,7 +19,7 @@ public class PLPLogicGenerator {
     public static Map<Condition,String> conditionMethods;
 
     // TODO: maintain plp - create methods to check time until true (if initially false)
-    public static String GeneratePLPModule(PLP plp, String path) {
+    public static String GeneratePLPModule(PLP plp) {
         conditionMethods = new HashMap<>();
         PythonWriter generator = new PythonWriter();
 
@@ -79,7 +79,7 @@ public class PLPLogicGenerator {
 
         // estimations
         generator.newLine();
-        generateEstimationFunctions(plp,generator,path);
+        generateEstimationFunctions(plp,generator);
         //
 
         // monitor termination
@@ -442,20 +442,20 @@ public class PLPLogicGenerator {
         generator.dendent();
     }
 
-    private static void generateEstimationFunctions(PLP plp, PythonWriter generator, String path) {
+    private static void generateEstimationFunctions(PLP plp, PythonWriter generator) {
         if (plp.getClass().isAssignableFrom(AchievePLP.class))
-            generateEstimationFunctions((AchievePLP) plp, generator, path);
+            generateEstimationFunctions((AchievePLP) plp, generator);
         else if (plp.getClass().isAssignableFrom(ObservePLP.class))
-            generateEstimationFunctions((ObservePLP) plp, generator, path);
+            generateEstimationFunctions((ObservePLP) plp, generator);
         else if (plp.getClass().isAssignableFrom(MaintainPLP.class))
-            generateEstimationFunctions((MaintainPLP) plp, generator, path);
+            generateEstimationFunctions((MaintainPLP) plp, generator);
         else if (plp.getClass().isAssignableFrom(DetectPLP.class))
-            generateEstimationFunctions((DetectPLP) plp, generator, path);
+            generateEstimationFunctions((DetectPLP) plp, generator);
         else
             throw new RuntimeException("Unsupported PLP type");
     }
 
-    private static void generateEstimationFunctions(AchievePLP aplp, PythonWriter generator, String path) {
+    private static void generateEstimationFunctions(AchievePLP aplp, PythonWriter generator) {
         generator.writeLine("def estimate(self):");
         generator.indent();
         generator.writeLine("result = PLPAchieveEstimation()");
@@ -468,7 +468,7 @@ public class PLPLogicGenerator {
             generator.writeLine(String.format("result.add_failure(self.estimate_%s_failure())",
                     fm.getCondition().simpleString()));
         if (aplp.getFailureModes().size() == 0)
-            generator.writeLine("result.add_failure(PLPFailureMode(\"General Failure Prob\",self.estimate_failure))");
+            generator.writeLine("result.add_failure(PLPFailureMode())");
         generator.writeLine("result.failure_time = self.estimate_failure_time()");
         generator.writeLine("return result");
         generator.dendent();
@@ -476,7 +476,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_success(self):");
         generator.indent();
-        writeBodyEstimateProb(aplp, aplp.getSuccessProb(), generator, path);
+        writeBodyEstimateProb(aplp, aplp.getSuccessProb(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -493,7 +493,7 @@ public class PLPLogicGenerator {
         else {
             generator.writeLine("def estimate_failure(self):");
             generator.indent();
-            writeBodyEstimateProb(aplp, aplp.getGeneralFailureProb(), generator, path);
+            writeBodyEstimateProb(aplp, aplp.getGeneralFailureProb(), generator);
             generator.dendent();
             generator.newLine();
         }
@@ -504,7 +504,7 @@ public class PLPLogicGenerator {
         generator.newLine();
     }
 
-    private static void generateEstimationFunctions(MaintainPLP mplp, PythonWriter generator, String path) {
+    private static void generateEstimationFunctions(MaintainPLP mplp, PythonWriter generator) {
         generator.writeLine("def estimate(self):");
         generator.indent();
         generator.writeLine("result = PLPAchieveEstimation()");
@@ -527,7 +527,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_success(self):");
         generator.indent();
-        writeBodyEstimateProb(mplp, mplp.getSuccessProb(), generator, path);
+        writeBodyEstimateProb(mplp, mplp.getSuccessProb(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -544,7 +544,7 @@ public class PLPLogicGenerator {
         else {
             generator.writeLine("def estimate_failure(self):");
             generator.indent();
-            writeBodyEstimateProb(mplp, mplp.getGeneralFailureProb(), generator, path);
+            writeBodyEstimateProb(mplp, mplp.getGeneralFailureProb(), generator);
             generator.dendent();
             generator.newLine();
         }
@@ -563,7 +563,7 @@ public class PLPLogicGenerator {
         }
     }
 
-    private static void generateEstimationFunctions(ObservePLP oplp, PythonWriter generator, String path) {
+    private static void generateEstimationFunctions(ObservePLP oplp, PythonWriter generator) {
         generator.writeLine("def estimate(self):");
         generator.indent();
         generator.writeLine("result = PLPObserveEstimation()");
@@ -580,7 +580,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_correct_observation(self):");
         generator.indent();
-        writeBodyEstimateProb(oplp, oplp.getCorrectObservationProb(), generator, path);
+        writeBodyEstimateProb(oplp, oplp.getCorrectObservationProb(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -594,7 +594,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_failure_to_observe(self):");
         generator.indent();
-        writeBodyEstimateProb(oplp, oplp.getFailureToObserveProb(),generator, path);
+        writeBodyEstimateProb(oplp, oplp.getFailureToObserveProb(),generator);
         generator.dendent();
         generator.newLine();
 
@@ -605,7 +605,7 @@ public class PLPLogicGenerator {
         generator.newLine();
     }
 
-    private static void generateEstimationFunctions(DetectPLP dplp, PythonWriter generator, String path) {
+    private static void generateEstimationFunctions(DetectPLP dplp, PythonWriter generator) {
         generator.writeLine("def estimate(self):");
         generator.indent();
         generator.writeLine("result = PLPDetectEstimation()");
@@ -618,7 +618,7 @@ public class PLPLogicGenerator {
 
         generator.writeLine("def estimate_detection_given_condition_prob(self):");
         generator.indent();
-        writeBodyEstimateProb(dplp, dplp.getSuccessProbGivenCondition(), generator, path);
+        writeBodyEstimateProb(dplp, dplp.getSuccessProbGivenCondition(), generator);
         generator.dendent();
         generator.newLine();
 
@@ -695,7 +695,7 @@ public class PLPLogicGenerator {
         generator.writeLine("return result");
     }
 
-    private static void writeBodyEstimateProb(PLP plp, List<ConditionalProb> probs, PythonWriter generator, String path) {
+    private static void writeBodyEstimateProb(PLP plp, List<ConditionalProb> probs, PythonWriter generator) {
         generator.writeLine("result = \"\"");
         for (ConditionalProb cProb : probs) {
             if (cProb.isConditional()) {
@@ -704,7 +704,7 @@ public class PLPLogicGenerator {
             else {
                 generator.writeLine("# TODO Implement the code that computes and returns the following probability");
                 generator.writeLine("# first defined probability = " + cProb.getProb().toString());
-                generator.writeLine(String.format("xml = minidom.parse('"+path+"%s.xml')",plp.getBaseName()));
+                generator.writeLine(String.format("xml = minidom.parse('../../%s.xml')",plp.getBaseName()));
                 generator.writeLine("parent = xml.getElementsByTagName(\"success_probability\")");
                 generator.writeLine("if parent:");
                 generator.indent();

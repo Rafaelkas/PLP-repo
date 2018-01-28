@@ -58,13 +58,13 @@
             average = sum(success) / len(success)
             msg += " Average Success: " + str(average * 100)
         # Write to xml
-        xml = minidom.parse('../xml/%1$s.xml')
+        xml = minidom.parse('../../%1$s.xml')
         parent = xml.getElementsByTagName("success_probability")
         if parent:
             for item in parent:
                 for child in item.getElementsByTagName('probability'):
                     child.attributes["value"].value = str("%%.2f" %% average)
-        with open("../xml/%1$s.xml", "wb") as f:
+        with open("../../%1$s.xml", "wb") as f:
             xml.writexml(f, encoding="utf-8")
         # Publish msg
         self.publisher.publish(

@@ -197,7 +197,7 @@ public class CodeGenerator {
 
     public static void GenerateMonitoringScripts(PLP plp, String path) {
         String PLPClasses = PLPClassesGenerator.GeneratePLPClasses(plp, true);
-        String PLPModule = PLPLogicGenerator.GeneratePLPModule(plp, path);
+        String PLPModule = PLPLogicGenerator.GeneratePLPModule(plp);
         String PLPHarness = PLPHarnessGenerator.GeneratePLPHarness(plp, path);
 
         writeStringToFile(PLPClasses, path+packageName+pathBreak+"scripts"+pathBreak+"PLP_"+plp.getBaseName()+"_classes.py");
