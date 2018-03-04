@@ -318,7 +318,8 @@ public class PLPHarnessGenerator {
                 if (pack != null){
                     generator.write("from "+pack+" ");
                     /// Adding it to the list, to later add it to the CMakeLists and package.xml
-                    CodeGenerator.importsForPackage.add(pack);
+                    if (!CodeGenerator.importsForPackage.contains(pack))
+                        CodeGenerator.importsForPackage.add(pack);
                 }
                 generator.write("import ");
                 NodeList classesNodes = importElement.getElementsByTagName("python_class");

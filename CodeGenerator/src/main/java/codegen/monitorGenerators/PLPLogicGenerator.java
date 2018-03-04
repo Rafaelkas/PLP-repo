@@ -704,7 +704,10 @@ public class PLPLogicGenerator {
             else {
                 generator.writeLine("# TODO Implement the code that computes and returns the following probability");
                 generator.writeLine("# first defined probability = " + cProb.getProb().toString());
-                generator.writeLine(String.format("xml = minidom.parse('../../%s.xml')",plp.getBaseName()));
+                generator.writeLine("import inspect");
+                generator.writeLine("import os");
+                generator.writeLine("parent_dir = os.path.abspath(os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + \"/../\") + \"/../\")");
+                generator.writeLine(String.format("xml = minidom.parse(parent_dir+'/%s.xml')",plp.getBaseName()));
                 generator.writeLine("parent = xml.getElementsByTagName(\"success_probability\")");
                 generator.writeLine("if parent:");
                 generator.indent();
@@ -843,6 +846,7 @@ public class PLPLogicGenerator {
                 generator.writeLine("# probability = " + cProb.getProb());
                 generator.writeLine("result = to_implement");
                 generator.newLine();
+                generator.dendent();
             }
             else {
                 generator.writeLine("# TODO Implement the code that computes \"prob\" to be the following probability");
