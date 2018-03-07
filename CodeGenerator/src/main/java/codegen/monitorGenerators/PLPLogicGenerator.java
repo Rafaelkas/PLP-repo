@@ -840,7 +840,7 @@ public class PLPLogicGenerator {
                 || Formula.class.isInstance(cProb.getCondition())
                 || QuantifiedCondition.class.isInstance(cProb.getCondition())) {
             if (!conditionMethods.get(cProb.getCondition()).equals("uncomputable")) {
-                generator.writeLine("if "+conditionMethods.get(cProb.getCondition())+":");
+                generator.writeLine("if "+generateIFcondition(cProb.getCondition())+":");
                 generator.indent();
                 generator.writeLine("# TODO Implement the code that computes and returns the following probability");
                 generator.writeLine("# probability = " + cProb.getProb());
