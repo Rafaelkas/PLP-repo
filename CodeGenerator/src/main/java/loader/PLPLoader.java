@@ -926,10 +926,11 @@ public class PLPLoader {
         NodeList expressions = formulaElement.getElementsByTagName("expression");
         NodeList ranges = formulaElement.getElementsByTagName("inside_range");
         String leftExp = ((Element)expressions.item(0)).getAttribute("value");
+        String input = ((Element)expressions.item(0)).getAttribute("input");
         Formula f;
         if (ranges.getLength() > 0) {
             Range range = (Range)parseRangesList((Element)ranges.item(0), "range").get(0);
-            f = new Formula(leftExp, range);
+            f = new Formula(leftExp, range, false, input);
         } else {
             String rightExp = ((Element)expressions.item(1)).getAttribute("value");
             NodeList operators = formulaElement.getElementsByTagName("operator");
@@ -949,10 +950,11 @@ public class PLPLoader {
         NodeList expressions = formulaElement.getElementsByTagName("expression");
         NodeList ranges = formulaElement.getElementsByTagName("inside_range");
         String leftExp = ((Element)expressions.item(0)).getAttribute("value");
+        String input = ((Element)expressions.item(0)).getAttribute("input");
         Formula f;
         if (ranges.getLength() > 0) {
             Range range = (Range)parseRangesList((Element)ranges.item(0), "range").get(0);
-            f = new Formula(leftExp, range);
+            f = new Formula(leftExp, range, true, input);
         } else {
             String rightExp = ((Element)expressions.item(1)).getAttribute("value");
             NodeList operators = formulaElement.getElementsByTagName("operator");
