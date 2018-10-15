@@ -41,6 +41,11 @@ public class PLPLogicGenerator {
         if (plp.getClass().isAssignableFrom(MaintainPLP.class)) {
             generator.writeLine("self.maintained_condition_true = " + (((MaintainPLP) plp).isInitiallyTrue() ? "True" : "False"));
         }
+
+        for (ProgressMeasure pm : plp.getProgressMeasures()) {
+            generator.writeLine(String.format("self.last_%s = 0", pm.getCondition().simpleString()));
+        }
+
         generator.dendent();
         generator.dendent();
         generator.writeFileContent(PLPLogicGenerator.class.getResourceAsStream("/PLPModuleHead.txt"));
@@ -1212,16 +1217,16 @@ public class PLPLogicGenerator {
         generator.writeLine("# Can estimate if got values for all of the parameters");
         generator.writeLine("# TODO: if not all parameters needed in order to estimate, remove some of the following conditions:");
         StringBuilder paramsCheck = new StringBuilder();
-        paramsCheck.append("return not (");
+        paramsCheck.append("return not ");
         for (PLPParameter param : plp.getExecParams()) {
-            paramsCheck.append(String.format("(self.plp_params.%s is None) or ",param.simpleString()));
+            paramsCheck.append(String.format("self.plp_params.%s is None or ",param.simpleString()));
         }
         for (PLPParameter param : plp.getInputParams()) {
-            paramsCheck.append(String.format("(self.plp_params.%s is None) or ",param.simpleString()));
+            paramsCheck.append(String.format("self.plp_params.%s is None or ",param.simpleString()));
         }
         // TODO: check if no params
         paramsCheck.delete(paramsCheck.length()-4,paramsCheck.length());
-        paramsCheck.append(")");
+        //paramsCheck.append(")");
 
         generator.writeLine(paramsCheck.toString());
         generator.setIndent(0);

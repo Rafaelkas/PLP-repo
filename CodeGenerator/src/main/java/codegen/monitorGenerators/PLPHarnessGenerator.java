@@ -123,12 +123,12 @@ public class PLPHarnessGenerator {
         generator.writeLine(String.format("# (All the parameters are defined in PLP_%s_classes.py)",plp.getBaseName()));
         StringBuilder triggerCheck = new StringBuilder();
         if(plp.getExecParams().size()>0) {
-            triggerCheck.append("return not (");
+            triggerCheck.append("return not ");
             for (PLPParameter param : plp.getExecParams()) {
-                triggerCheck.append(String.format("(self.plp_params.%s is None) or ", param.simpleString()));
+                triggerCheck.append(String.format("self.plp_params.%s is None or ", param.simpleString()));
             }
             triggerCheck.delete(triggerCheck.length() - 4, triggerCheck.length());
-            triggerCheck.append(")");
+            triggerCheck.append("");
         }
         else
         {
