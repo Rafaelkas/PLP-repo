@@ -16,7 +16,6 @@ public class Formula implements Condition {
     private String key_desc;
     private Range inRange;
     private boolean isMeasure;
-    private String input;
 
     public Formula(String leftExpr, String rightExpr, String operator) {
         this.leftExpr = leftExpr;
@@ -24,11 +23,10 @@ public class Formula implements Condition {
         this.operator = operator;
     }
 
-    public Formula(String leftExpr, Range inRange, boolean isMeasure, String input) {
+    public Formula(String leftExpr, Range inRange, boolean isMeasure) {
         this.leftExpr = leftExpr;
         this.inRange = inRange;
         this.isMeasure = isMeasure;
-        this.input = input;
     }
 
     public void setDescription(String desc) {
@@ -41,10 +39,6 @@ public class Formula implements Condition {
 
     public String getKeyDesc() {
         return this.key_desc;
-    }
-
-    public String getInput() {
-        return this.input;
     }
 
     public Range getRange() {

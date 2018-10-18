@@ -899,7 +899,6 @@ public class PLPLogicGenerator {
                     Formula formula = (Formula) entry.getKey();
                     String leftExpr = ((Formula)entry.getKey()).getLeftExpr();
                     boolean isMeasure = ((Formula)entry.getKey()).getIsMeasure();
-                    String name = ((Formula)entry.getKey()).getInput();
                     String keyDesc = ((Formula)entry.getKey()).getKeyDesc();
                     if (leftExpr.matches("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?")){
                         generator.writeLine("expr1 = "+leftExpr);
@@ -911,13 +910,7 @@ public class PLPLogicGenerator {
                     else
                         if (isMeasure) {
                             generator.writeLine("expr1 = self.variables()." + leftExpr + " - self.last_" + keyDesc);
-                            generator.writeLine("self.variables()." + leftExpr + " = self.last_" + keyDesc);
-                            generator.writeLine("self.last_" + keyDesc+" = self.plp_params."+name);
-                            generator.writeLine("if self.variables()." + leftExpr + " is None:");
-                            generator.indent();
-                            generator.writeLine("return True");
-                            generator.dendent();
-                            generator.writeLine("else:");
+                            generator.writeLine("self.last_" + keyDesc+" = self.variables()." + leftExpr);
                         }
                         else
                             generator.writeLine("expr1 = #"+leftExpr);
@@ -949,12 +942,10 @@ public class PLPLogicGenerator {
 
                     }
                     else {
-                        generator.indent();
                         generator.writeLine("#return check if expr1 is inside the range: "+formula.getRange());
                         if (isMeasure) {
                             generator.writeLine("return "+formula.getRange().getMinValue()+" <= expr1 <= "+formula.getRange().getMaxValue() );
                         }
-                        generator.dendent();
                     }
                 } else if (QuantifiedCondition.class.isInstance(entry.getKey())) {
                     QuantifiedCondition qCond = (QuantifiedCondition) entry.getKey();
