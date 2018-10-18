@@ -11,10 +11,12 @@ public class Variable {
     List<Range> possibleRanges;
     List<String> possibleValues;
     private FieldType type;
+    private String input;
 
-    public Variable(String name, FieldType type) {
+    public Variable(String name, FieldType type, String input) {
         this.name = name;
         this.type = type;
+        this.input = input;
         this.possibleRanges = new LinkedList();
         this.possibleValues = new LinkedList();
     }
@@ -33,6 +35,10 @@ public class Variable {
 
     public String getName() {
         return this.name;
+    }
+
+    public String getInput() {
+        return this.input;
     }
 
     public List<Range> getPossibleRanges() {

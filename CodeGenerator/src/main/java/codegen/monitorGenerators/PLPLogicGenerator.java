@@ -250,7 +250,10 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# TODO Implement code to calculate "+var.getName());
             generator.writeLine("# return the value of the variable");
-            generator.writeLine("return None");
+            if (var.getInput()=="")
+                generator.writeLine("return None");
+            else
+                generator.writeLine("return self.plp_params."+var.getInput());
             generator.dendent();
             generator.newLine();
         }
@@ -908,12 +911,13 @@ public class PLPLogicGenerator {
                     else if (leftExpr.toUpperCase().equals("FALSE"))
                         generator.writeLine("expr1 = False");
                     else
+                        generator.writeLine("# make sure that variable is not None");
                         if (isMeasure) {
                             generator.writeLine("expr1 = self.variables()." + leftExpr + " - self.last_" + keyDesc);
                             generator.writeLine("self.last_" + keyDesc+" = self.variables()." + leftExpr);
                         }
                         else
-                            generator.writeLine("expr1 = #"+leftExpr);
+                            generator.writeLine("expr1 = self.variables()." + leftExpr);
                     String rightExpr = ((Formula)entry.getKey()).getRightExpr();
                     if (formula.getRightExpr() != null) {
                         if (rightExpr.matches("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?")) {

@@ -816,7 +816,7 @@ public class PLPLoader {
                 Condition c = null;
                 String var5 = childNodes.item(i).getNodeName();
                 byte var6 = -1;
-                System.out.println(var5.hashCode());
+                //System.out.println(var5.hashCode());
                 switch(var5.hashCode()) {
                     case -1249011565:
                         if (var5.equals("predicate_condition")) {
@@ -1060,8 +1060,9 @@ public class PLPLoader {
             if (varList.item(i).getNodeType() == 1) {
                 Element currVar = (Element)varList.item(i);
                 String stringType = currVar.getAttribute("type");
+                String input = currVar.getAttribute("input");
                 FieldType type = getFieldTypeFromString(stringType);
-                Variable plpVar = new Variable(currVar.getAttribute("name"), type);
+                Variable plpVar = new Variable(currVar.getAttribute("name"), type, input);
                 List<Range> ranges = parseRangesList(currVar, "possible_range");
                 Iterator var9 = ranges.iterator();
 
