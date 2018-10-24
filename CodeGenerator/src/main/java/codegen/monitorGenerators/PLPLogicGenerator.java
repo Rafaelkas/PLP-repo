@@ -175,7 +175,7 @@ public class PLPLogicGenerator {
         // parameters updated callback
         generator.writeLine("def parameters_updated(self):");
         generator.indent();
-        generator.writeLine("# Called when parameters where updated (might effect variables)");
+        generator.writeLine("# Called when parameters were updated (might affect variables)");
         generator.writeLine("# Triggers estimation and monitoring. You can uncomment one if you're not interested in it");
         generator.writeLine("termination = self.detect_termination()");
         generator.writeLine("if termination is None:");
@@ -913,8 +913,9 @@ public class PLPLogicGenerator {
                     else
                         generator.writeLine("# make sure that variable is not None");
                         if (isMeasure) {
-                            generator.writeLine("expr1 = self.variables()." + leftExpr + " - self.last_" + keyDesc);
-                            generator.writeLine("self.last_" + keyDesc+" = self.variables()." + leftExpr);
+                            generator.writeLine(leftExpr + " = abs(self.variables()." + leftExpr +")");
+                            generator.writeLine("expr1 = "+ leftExpr + " - self.last_" + keyDesc);
+                            generator.writeLine("self.last_" + keyDesc+" = " + leftExpr);
                         }
                         else
                             generator.writeLine("expr1 = self.variables()." + leftExpr);
@@ -928,7 +929,7 @@ public class PLPLogicGenerator {
                         else if (rightExpr.toUpperCase().equals("FALSE"))
                             generator.writeLine("expr2 = False");
                         else
-                            generator.writeLine("expr2 = #" + rightExpr);
+                            generator.writeLine("expr2 = "+"\""+ rightExpr+"\"");
 
                         switch (formula.getOperator()) {
                             case "=":
