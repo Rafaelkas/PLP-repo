@@ -896,7 +896,7 @@ public class PLPLogicGenerator {
                 if (Predicate.class.isInstance(entry.getKey())) {
                     generator.writeLine("# TODO implement code that checks the following predicate condition");
                     generator.writeLine("# Predicate: " + entry.getKey().toString());
-                    generator.writeLine("return False");
+                    generator.writeLine("return None");
                 } else if (Formula.class.isInstance(entry.getKey())) {
                     generator.writeLine("# TODO implement code for the following expressions");
                     Formula formula = (Formula) entry.getKey();
@@ -998,7 +998,21 @@ public class PLPLogicGenerator {
                 || QuantifiedCondition.class.isInstance(condition)) {
             if (conditionMethods.get(condition).equals("uncomputable"))
                 return "(False)";
-            return "self." + conditionMethods.get(condition).replaceAll("self","");
+            if (Formula.class.isInstance(condition))
+                return "self." + conditionMethods.get(condition).replaceAll("self","");
+            else {
+                Predicate name = (Predicate) condition;
+                StringBuilder triggerCheck = new StringBuilder();
+                triggerCheck.append("");
+
+                for (String s : name.getValues()) {
+                    triggerCheck.append(String.format("self.variables().%s, ", s));
+                }
+                if (triggerCheck.length()>0)
+                    triggerCheck.delete(triggerCheck.length() - 2, triggerCheck.length());
+                triggerCheck.append("");
+                return "self.check_condition_" + name.getName() + "(" + triggerCheck.toString() + ")";
+            }
         }
         else if (NotCondition.class.isInstance(condition)) {
             return "not " + generateIFcondition(((NotCondition) condition).getCondition());
@@ -1208,9 +1222,19 @@ public class PLPLogicGenerator {
             if (!conditionMethods.containsKey(cond)) {
                 if (uncomputableCondition(plp, cond))
                     conditionMethods.put(cond, "uncomputable");
-                else
-                    conditionMethods.put(cond,
-                            "check_condition_".concat(((Predicate) cond).simpleString())+"("+signatureArgs+")");
+                else {
+                    Predicate temp_pred = (Predicate) cond;
+                    String formattedString = temp_pred.getValues().toString()
+                            .replace("[", "")  //remove the right bracket
+                            .replace("]", "")  //remove the left bracket
+                            .trim();           //remove trailing spaces from partially initialized arrays
+                    if (formattedString.length()>0)
+                        conditionMethods.put(cond,
+                                "check_condition_".concat(((Predicate) cond).getName()) + "("+signatureArgs +", " + formattedString + ")");
+                    else
+                        conditionMethods.put(cond,
+                                "check_condition_".concat(((Predicate) cond).getName()) + "("+signatureArgs +")");
+                }
             }
         }
     }

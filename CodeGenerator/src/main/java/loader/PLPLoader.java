@@ -939,7 +939,7 @@ public class PLPLoader {
             operator = operator.replace("greater", ">");
             operator = operator.replace("less_equal", "<=");
             operator = operator.replace("greater_equal", ">=");
-            f = new Formula(leftExp, rightExp, operator);
+            f = new Formula(leftExp, rightExp, operator, false);
         }
 
         f.setDescription(formulaElement.getAttribute("key_description"));
@@ -963,7 +963,7 @@ public class PLPLoader {
             operator = operator.replace("greater", ">");
             operator = operator.replace("less_equal", "<=");
             operator = operator.replace("greater_equal", ">=");
-            f = new Formula(leftExp, rightExp, operator);
+            f = new Formula(leftExp, rightExp, operator, true);
         }
 
         f.setDescription(formulaElement.getAttribute("key_description"));

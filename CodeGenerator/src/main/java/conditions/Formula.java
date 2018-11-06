@@ -17,10 +17,11 @@ public class Formula implements Condition {
     private Range inRange;
     private boolean isMeasure;
 
-    public Formula(String leftExpr, String rightExpr, String operator) {
+    public Formula(String leftExpr, String rightExpr, String operator, boolean isMeasure) {
         this.leftExpr = leftExpr;
         this.rightExpr = rightExpr;
         this.operator = operator;
+        this.isMeasure = isMeasure;
     }
 
     public Formula(String leftExpr, Range inRange, boolean isMeasure) {
