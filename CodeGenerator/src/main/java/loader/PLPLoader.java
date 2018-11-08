@@ -852,8 +852,8 @@ public class PLPLoader {
                         if (var5.equals("forall_condition")) {
                             var6 = 3;
                         }
-                    case 728410161:
-                        if (var5.equals("measures_condition")) {
+                    case 874865072:
+                        if (var5.equals("compute_delta")) {
                             var6 = 7;
                         }
                 }

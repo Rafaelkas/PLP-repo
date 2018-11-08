@@ -650,7 +650,7 @@ public class PLPLogicGenerator {
                 else {
                     generator.writeLine("# TODO Implement the code that computes and returns the following probability");
                     generator.writeLine("# probability = " + cProb.getProb().toString());
-                    generator.writeLine("result = to_implement");
+                    generator.writeLine("result = \"" + cProb.getProb().toString()+"\"");
                 }
             }
             generator.writeLine("failureMode.probability = result");
@@ -673,7 +673,7 @@ public class PLPLogicGenerator {
                 if (AssignmentEffect.class.isInstance(sEff)) {
                     generator.writeLine("#TODO Implement the code that computes the parameters new value \"val\" to be the following:");
                     generator.writeLine("# new value = " + ((AssignmentEffect) sEff).getExpression());
-                    generator.writeLine("val = to_implement");
+                    generator.writeLine("val = \""+ ((AssignmentEffect) sEff).getExpression()+"\"");
                     generator.writeLine("result += \"" +
                             ((AssignmentEffect) sEff).getParam() + "  = \" + repr(val) + \",\"");
                 }
@@ -697,7 +697,7 @@ public class PLPLogicGenerator {
             else {
                 generator.writeLine("# TODO Implement the code that computes and returns the following distribution");
                 generator.writeLine("# distribution = " + cDist.getDist().toString());
-                generator.writeLine("result = to_implement");
+                generator.writeLine("result = \"" + cDist.getDist().toString() + "\"");
             }
         }
         generator.writeLine("return result");
@@ -758,7 +758,7 @@ public class PLPLogicGenerator {
                 if (AssignmentEffect.class.isInstance(condEff.getEffect())) {
                     generator.writeLine("# TODO Implement the code that computes the parameters new value \"val\" to be the following:");
                     generator.writeLine("# new value = " + ((AssignmentEffect) condEff.getEffect()).getExpression());
-                    generator.writeLine("val = to_implement");
+                    generator.writeLine("val = \"" + ((AssignmentEffect) condEff.getEffect()).getExpression() + "\"");
                     generator.writeLine("result += \"If "+condEff.getCondition().toString()+" : " +
                             ((AssignmentEffect) condEff.getEffect()).getParam() + "\"  = repr(val) + \",\"");
                     generator.newLine();
@@ -775,7 +775,7 @@ public class PLPLogicGenerator {
             if (AssignmentEffect.class.isInstance(condEff.getEffect())) {
                 generator.writeLine("# TODO Implement the code that computes the parameters new value \"val\" to be the following:");
                 generator.writeLine("# new value = " + ((AssignmentEffect) condEff.getEffect()).getExpression());
-                generator.writeLine("val = to_implement");
+                generator.writeLine("val = \"" + ((AssignmentEffect) condEff.getEffect()).getExpression() + "\"");
                 generator.writeLine("result += \"If " + condEff.getCondition().toString() + " : " +
                         ((AssignmentEffect) condEff.getEffect()).getParam() + "\"  = repr(val) + \",\"");
                 generator.newLine();
@@ -792,7 +792,7 @@ public class PLPLogicGenerator {
             if (AssignmentEffect.class.isInstance(condEff.getEffect())) {
                 generator.writeLine("#TODO Implement the code that computes the parameters new value \"val\" to be the following:");
                 generator.writeLine("# new value = " + ((AssignmentEffect) condEff.getEffect()).getExpression());
-                generator.writeLine("val = to_implement");
+                generator.writeLine("val = \"" + ((AssignmentEffect) condEff.getEffect()).getExpression() + "\"");
                 generator.writeLine("result += \"If " + condEff.getCondition().toString() + " : " +
                         ((AssignmentEffect) condEff.getEffect()).getParam() + "\"  = repr(val) + \",\"");
                 generator.newLine();
@@ -813,13 +813,13 @@ public class PLPLogicGenerator {
                 generator.indent();
                 generator.writeLine("# TODO Implement the code that computes and returns the following distribution");
                 generator.writeLine("# distribution = " + cDist.getDist().toString());
-                generator.writeLine("result = to_implement");
+                generator.writeLine("result = \"" + cDist.getDist().toString() + "\"");
                 generator.newLine();
             }
             else {
                 generator.writeLine("# TODO Implement the code that computes \"dist\" to be the following distribution");
                 generator.writeLine("# distribution = " + cDist.getDist().toString());
-                generator.writeLine("dist = to_implement");
+                generator.writeLine("dist = \"" + cDist.getDist().toString() + "\"");
                 generator.writeLine("result += \"If "+cDist.getCondition().toString()+" : \" + repr(prob) + \",\"");
                 generator.newLine();
             }
@@ -829,7 +829,7 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# TODO Implement the code that computes and returns the following distribution");
             generator.writeLine("# distribution = " + cDist.getDist().toString());
-            generator.writeLine("result = to_implement");
+            generator.writeLine("result = \"" + cDist.getDist().toString() + "\"");
             generator.newLine();
         }
         else if (BitwiseOperation.class.isInstance(cDist.getCondition())) {
@@ -838,7 +838,7 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# TODO Implement the code that computes and returns the following distribution");
             generator.writeLine("# distribution = " + cDist.getDist().toString());
-            generator.writeLine("result = to_implement");
+            generator.writeLine("result = \"" + cDist.getDist().toString() + "\"");
             generator.newLine();
         }
     }
@@ -852,14 +852,14 @@ public class PLPLogicGenerator {
                 generator.indent();
                 generator.writeLine("# TODO Implement the code that computes and returns the following probability");
                 generator.writeLine("# probability = " + cProb.getProb());
-                generator.writeLine("result = to_implement");
+                generator.writeLine("result = \"" + cProb.getProb() + "\"");
                 generator.newLine();
                 generator.dendent();
             }
             else {
                 generator.writeLine("# TODO Implement the code that computes \"prob\" to be the following probability");
                 generator.writeLine("# probability = " + cProb.getProb());
-                generator.writeLine("prob = to_implement");
+                generator.writeLine("prob = \"" + cProb.getProb() + "\"");
                 generator.writeLine("result += \"If "+cProb.getCondition().toString()+" : \" + repr(prob) + \",\"");
                 generator.newLine();
             }
@@ -869,7 +869,7 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# TODO Implement the code that computes and returns the following probability");
             generator.writeLine("# probability = " + cProb.getProb());
-            generator.writeLine("result = to_implement");
+            generator.writeLine("result = \"" + cProb.getProb() + "\"");
             generator.newLine();
         }
         else if (BitwiseOperation.class.isInstance(cProb.getCondition())) {
@@ -878,7 +878,7 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# TODO Implement the code that computes and returns the following probability");
             generator.writeLine("# probability = " + cProb.getProb());
-            generator.writeLine("result = to_implement");
+            generator.writeLine("result = \"" + cProb.getProb() + "\"");
             generator.newLine();
         }
     }
