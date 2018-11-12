@@ -903,6 +903,7 @@ public class PLPLogicGenerator {
                     String leftExpr = ((Formula)entry.getKey()).getLeftExpr();
                     boolean isMeasure = ((Formula)entry.getKey()).getIsMeasure();
                     String keyDesc = ((Formula)entry.getKey()).getKeyDesc();
+                    String rightExpr = ((Formula)entry.getKey()).getRightExpr();
                     if (leftExpr.matches("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?")){
                         generator.writeLine("expr1 = "+leftExpr);
                     }
@@ -912,15 +913,14 @@ public class PLPLogicGenerator {
                         generator.writeLine("expr1 = False");
                     else
                         generator.writeLine("# make sure that variable is not None");
-                        if (isMeasure) {
+                        if (isMeasure && rightExpr == null) {
                             generator.writeLine(leftExpr + " = abs(self.variables()." + leftExpr +")");
                             generator.writeLine("expr1 = "+ leftExpr + " - self.last_" + keyDesc);
                             generator.writeLine("self.last_" + keyDesc+" = " + leftExpr);
                         }
                         else
                             generator.writeLine("expr1 = self.variables()." + leftExpr);
-                    String rightExpr = ((Formula)entry.getKey()).getRightExpr();
-                    if (formula.getRightExpr() != null) {
+                   if (formula.getRightExpr() != null) {
                         if (rightExpr.matches("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?")) {
                             generator.writeLine("expr2 = " + rightExpr);
                         }
