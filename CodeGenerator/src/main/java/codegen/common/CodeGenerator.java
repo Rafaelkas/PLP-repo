@@ -24,6 +24,7 @@ public class CodeGenerator {
 
     public static String packageName;
     public static String outputTopic = "/plp/messages";
+    public static String triggerTopic = "/plp/trigger";
     public static List<String> importsForPackage;
     public static String pathBreak = "";
 

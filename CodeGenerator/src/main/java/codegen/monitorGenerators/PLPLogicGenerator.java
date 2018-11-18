@@ -920,7 +920,7 @@ public class PLPLogicGenerator {
                         }
                         else
                             generator.writeLine("expr1 = self.variables()." + leftExpr);
-                   if (formula.getRightExpr() != null) {
+                    if (formula.getRightExpr() != null) {
                         if (rightExpr.matches("[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?")) {
                             generator.writeLine("expr2 = " + rightExpr);
                         }
@@ -1254,9 +1254,9 @@ public class PLPLogicGenerator {
 
         generator.indent();
         generator.writeLine("# Can estimate if got values for all of the parameters");
-        generator.writeLine("# TODO: if not all parameters needed in order to estimate, remove some of the following conditions:");
+        generator.writeLine("# TODO: if not all parameters needed in order to estimate, add some of the following conditions:");
         StringBuilder paramsCheck = new StringBuilder();
-        paramsCheck.append("return not ");
+        paramsCheck.append("return not self.plp_params.trigger is None  # or ");
         for (PLPParameter param : plp.getExecParams()) {
             paramsCheck.append(String.format("self.plp_params.%s is None or ",param.simpleString()));
         }

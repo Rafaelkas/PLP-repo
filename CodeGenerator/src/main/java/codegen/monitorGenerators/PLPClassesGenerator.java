@@ -25,6 +25,7 @@ public class PLPClassesGenerator {
         generator.indent();
         generator.writeLine("self.callback = None");
         generator.writeLine("self.timer_start = None");
+        generator.writeLine("self.trigger = None");
         generator.writeLine("# Execution Parameters");
         for (PLPParameter p : plp.getExecParams()) {
             generator.writeLine(String.format("self.%s = None", p.simpleString()));
@@ -45,6 +46,15 @@ public class PLPClassesGenerator {
             List<PLPParameter> allParams = new LinkedList<>(plp.getExecParams());
             allParams.addAll(plp.getInputParams());
             allParams.addAll(plp.getOutputParams());
+            generator.writeLine("def set_trigger(self, a_trigger):");
+            generator.indent();
+            generator.writeLine("self.trigger = a_trigger");
+            generator.writeLine("if self.callback:");
+            generator.indent();
+            generator.writeLine("self.callback.parameters_updated()");
+            generator.dendent();
+            generator.dendent();
+            generator.newLine();
             for (PLPParameter p : allParams) {
                 String pName = p.simpleString();
                 generator.writeLine(String.format("def set_%1$s(self, a_%1$s):", pName));

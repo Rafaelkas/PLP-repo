@@ -21,10 +21,12 @@ import java.util.Map;
 public class PLPHarnessGenerator {
 
     public static Map<String, ParameterGlue> parameterLocations;
+    public static String trigger;
 
     public static String GeneratePLPHarness(PLP plp, String path) {
 
         parameterLocations = new HashMap<>();
+        trigger = new String();
         PythonWriter generator = new PythonWriter();
 
         generator.writeLine("#!/usr/bin/env python");
@@ -32,6 +34,7 @@ public class PLPHarnessGenerator {
         generator.writeLine("import sys");
         generator.writeLine("import logging");
         generator.writeLine("from xml.dom import minidom");
+        generator.writeLine("from std_msgs.msg import String");
 
         generator.newLine();
         handleGlueFile(generator, plp, path);
@@ -41,6 +44,7 @@ public class PLPHarnessGenerator {
         generator.writeLine(String.format("from PLP_%s_classes import *",plp.getBaseName()));
         generator.newLine();
         generator.writeLine(String.format("PLP_TOPIC = \"%s\"",CodeGenerator.outputTopic));
+        generator.writeLine(String.format("PLP_TRIGGER = \"%s\"",CodeGenerator.triggerTopic));
         generator.writeLine(String.format("logger = logging.getLogger(\"%s\")",plp.getBaseName()));
         generator.newLine();
         generator.writeLine(String.format("class PLP_%s_ros_harness(object):",plp.getBaseName()));
@@ -104,8 +108,15 @@ public class PLPHarnessGenerator {
         generator.dendent();
         generator.newLine();
 
+        generator.writeLine("def trigger_updated(self, msg):");
+        generator.indent();
+        generator.writeLine("self.plp_params.set_trigger(msg.data)");
+        generator.writeLine("self.consider_trigger()");
+        generator.dendent();
+        generator.newLine();
+
         for (PLPParameter param : plp.getExecParams()) {
-            generateParameterUpdateFunction(generator, param, true, false, true);
+            generateParameterUpdateFunction(generator, param, false, false, true);
         }
         for (PLPParameter param : plp.getInputParams()) {
             generateParameterUpdateFunction(generator, param, false, false, true);
@@ -122,8 +133,8 @@ public class PLPHarnessGenerator {
         generator.writeLine("# You can also use the defined constants using self.plp_constants[<constant_name>]");
         generator.writeLine(String.format("# (All the parameters are defined in PLP_%s_classes.py)",plp.getBaseName()));
         StringBuilder triggerCheck = new StringBuilder();
+        triggerCheck.append("return self.plp_params.trigger == \"" + trigger + "\" # or not ");
         if(plp.getExecParams().size()>0) {
-            triggerCheck.append("return not ");
             for (PLPParameter param : plp.getExecParams()) {
                 triggerCheck.append(String.format("self.plp_params.%s is None or ", param.simpleString()));
             }
@@ -197,6 +208,7 @@ public class PLPHarnessGenerator {
         generator.writeLine("# ROS related stuff");
         generator.writeLine(String.format("rospy.init_node(\"plp_%s\", anonymous=False)",plp.getBaseName()));
         generator.writeLine("self.publisher = rospy.Publisher(PLP_TOPIC, PLPMessage, queue_size=5)");
+        generator.writeLine("rospy.Subscriber(PLP_TRIGGER, String, self.trigger_updated)");
         generateAllParamTopics(generator, plp, true);
         generator.newLine();
     }
@@ -307,6 +319,7 @@ public class PLPHarnessGenerator {
             Element rootElement = doc.getDocumentElement();
             String nodeNameWithoutNS = rootElement.getNodeName().substring(rootElement.getNodeName().indexOf(':')+1);
 
+            trigger = rootElement.getAttribute("trigger");
             if (!nodeNameWithoutNS.equals("code_generator_glue")) {
                 throw new IllegalArgumentException("file " + gluePath + " is not a legal glue file");
             }
@@ -315,19 +328,21 @@ public class PLPHarnessGenerator {
             for (int i=0; i<importNodes.getLength(); i++) {
                 Element importElement = (Element) importNodes.item(i);
                 String pack = importElement.getAttribute("from");
-                if (pack != null){
-                    generator.write("from "+pack+" ");
-                    /// Adding it to the list, to later add it to the CMakeLists and package.xml
-                    if (!CodeGenerator.importsForPackage.contains(pack))
-                        CodeGenerator.importsForPackage.add(pack);
+                if (!pack.equals("std_msgs.msg")) {
+                    if (pack != null) {
+                        generator.write("from " + pack + " ");
+                        /// Adding it to the list, to later add it to the CMakeLists and package.xml
+                        if (!CodeGenerator.importsForPackage.contains(pack))
+                            CodeGenerator.importsForPackage.add(pack);
+                    }
+                    generator.write("import ");
+                    NodeList classesNodes = importElement.getElementsByTagName("python_class");
+                    for (int j = 0; j < classesNodes.getLength() - 1; j++) {
+                        generator.write((classesNodes.item(j).getTextContent() + ", "));
+                    }
+                    generator.writeLine((classesNodes.item(classesNodes.getLength() - 1)).getTextContent());
                 }
-                generator.write("import ");
-                NodeList classesNodes = importElement.getElementsByTagName("python_class");
-                for (int j=0; j<classesNodes.getLength()-1; j++) {
-                    generator.write((classesNodes.item(j).getTextContent()+", "));
-                }
-                generator.writeLine((classesNodes.item(classesNodes.getLength()-1)).getTextContent());
-            }
+           }
 
             NodeList parameterNodes = rootElement.getElementsByTagName("parameter_location");
             for (int i=0; i<parameterNodes.getLength(); i++) {
