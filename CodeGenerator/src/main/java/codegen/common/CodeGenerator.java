@@ -3,6 +3,7 @@ package codegen.common;
 import codegen.middlewareGenerators.MiddlewareGenerator;
 import codegen.monitorGenerators.PLPClassesGenerator;
 import codegen.monitorGenerators.PLPHarnessGenerator;
+import codegen.monitorGenerators.PLPLaunchGenerator;
 import codegen.monitorGenerators.PLPLogicGenerator;
 import fr.uga.pddl4j.parser.Domain;
 import fr.uga.pddl4j.parser.Op;
@@ -48,22 +49,28 @@ public class CodeGenerator {
             generateROSPackage(path);
 
             copyResourceFile("PLPClasses.py",path+packageName+pathBreak+"scripts"+pathBreak);
+            copyResourceFile("PLP_resources_server.py",path+packageName+pathBreak+"scripts"+pathBreak);
+            copyResourceFile("list.txt",path+packageName+pathBreak+"scripts"+pathBreak);
+            List<String> namesForLaunch = new LinkedList<>();;
             for (AchievePLP aPLP : PLPLoader.getAchievePLPs()) {
-                CodeGenerator.GenerateMonitoringScripts(aPLP, path);
+                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(aPLP, path));
             }
             for (MaintainPLP mPLP : PLPLoader.getMaintainPLPs()) {
-                CodeGenerator.GenerateMonitoringScripts(mPLP, path);
+                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(mPLP, path));
             }
             for (ObservePLP oPLP : PLPLoader.getObservePLPs()) {
-                CodeGenerator.GenerateMonitoringScripts(oPLP, path);
+                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(oPLP, path));
             }
             for (DetectPLP dPLP : PLPLoader.getDetectPLPs()) {
-                CodeGenerator.GenerateMonitoringScripts(dPLP, path);
+                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(dPLP, path));
             }
 
+            String PLPLaunchFile = PLPLaunchGenerator.GenerateLaunchFile(namesForLaunch);
+            writeStringToFile(PLPLaunchFile, path+packageName+pathBreak+"launch"+pathBreak+"plp.launch");
             generateCMakeLists(path+packageName, true);
             generatePackageXMLFile(path+packageName, true);
             copyResourceFile("PLPMessage.msg", path+packageName+pathBreak+"msg"+pathBreak);
+            copyResourceFile("Resources.srv",path+packageName+pathBreak+"srv"+pathBreak);
         }
         else if (args.length > 3 && args[0].equals("-dispatcher")) {
             String plpPath = args[2];
@@ -200,7 +207,7 @@ public class CodeGenerator {
         launch.mkdir();
     }
 
-    public static void GenerateMonitoringScripts(PLP plp, String path) {
+    public static String GenerateMonitoringScripts(PLP plp, String path) {
         String PLPClasses = PLPClassesGenerator.GeneratePLPClasses(plp, true);
         String PLPModule = PLPLogicGenerator.GeneratePLPModule(plp);
         String PLPHarness = PLPHarnessGenerator.GeneratePLPHarness(plp, path);
@@ -210,6 +217,8 @@ public class CodeGenerator {
         writeStringToFile(PLPModule, path+packageName+pathBreak+"scripts"+pathBreak+"PLP_"+plp.getBaseName()+"_logic.py");
 
         writeStringToFile(PLPHarness, path+packageName+pathBreak+"scripts"+pathBreak+"PLP_"+plp.getBaseName()+"_ros_harness.py");
+
+        return plp.getBaseName();
     }
 
     private static void writeStringToFile(String string, String fullPath) {

@@ -30,10 +30,11 @@ public class PLPHarnessGenerator {
         PythonWriter generator = new PythonWriter();
 
         generator.writeLine("#!/usr/bin/env python");
-        generator.writeLine("import rospy");
-        generator.writeLine("import sys");
+//        generator.writeLine("import rospy");
+//        generator.writeLine("import sys");
         generator.writeLine("import logging");
-        generator.writeLine("from xml.dom import minidom");
+        generator.writeLine("import rosservice");
+//        generator.writeLine("from xml.dom import minidom");
         generator.writeLine("from std_msgs.msg import String");
 
         generator.newLine();
@@ -52,6 +53,14 @@ public class PLPHarnessGenerator {
         generator.newLine();
         generateInitFunction(generator,plp);
 
+        if (plp.getRequiredResources().size()>0) {
+            generator.writeLine("rospy.wait_for_service('resources_list')");
+            generator.writeLine("if \"/resources_list\" in rosservice.get_service_list():");
+            generator.indent();
+            generator.writeLine(String.format("rospy.loginfo(\"<PLP:%s>: Service resources is up!\")", plp.getBaseName()));
+            generator.dendent();
+            generator.newLine();
+        }
         generator.writeFileContent(PLPHarnessGenerator.class.getResourceAsStream("/HarnessMain.txt"), plp.getBaseName(), plp.getClass().getSimpleName());
 
         generator.dendent();
@@ -79,6 +88,10 @@ public class PLPHarnessGenerator {
         generator.writeLine(String.format("rospy.loginfo(\"<PLP:%s> trigger detected, starting \" + \"monitoring\" if self.monitor else \"capturing\")",plp.getBaseName()));
         generator.writeLine(String.format("self.plp = PLP_%s_logic(self.plp_constants, self.plp_params, self)",plp.getBaseName()));
         generator.writeLine("self.plp_params.callback = self.plp");
+        if (plp.getRequiredResources().size()>0)
+        {
+            generator.writeLine("harness.plp.monitor_resources()");
+        }
         generator.writeLine("# Progress measures callbacks");
         counter = 1;
         for (ProgressMeasure pm : plp.getProgressMeasures()) {
@@ -129,7 +142,8 @@ public class PLPHarnessGenerator {
         generator.writeLine("def check_trigger(self):");
         generator.indent();
         generator.writeLine("# The execution parameters are considered the trigger");
-        generator.writeLine("# If the trigger includes requirements on other parameters, add them using self.plp_params.<param_name> and uncomment the relevant line in the update functions above");
+        generator.writeLine("# If the trigger includes requirements on other parameters, add them using self.plp_params.<param_name>");
+        generator.writeLine("# and uncomment the relevant line in the update functions above");
         generator.writeLine("# You can also use the defined constants using self.plp_constants[<constant_name>]");
         generator.writeLine(String.format("# (All the parameters are defined in PLP_%s_classes.py)",plp.getBaseName()));
         StringBuilder triggerCheck = new StringBuilder();
@@ -147,6 +161,7 @@ public class PLPHarnessGenerator {
         }
         generator.writeLine(triggerCheck.toString());
         generator.dendent();
+        generator.newLine();
         generator.newLine();
         generator.dendent();
 

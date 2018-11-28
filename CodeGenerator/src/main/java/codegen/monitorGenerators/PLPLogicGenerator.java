@@ -26,6 +26,8 @@ public class PLPLogicGenerator {
         generator.writeLine("from PLPClasses import *");
         generator.writeLine(String.format("from PLP_%s_classes import *",plp.getBaseName()));
         generator.writeLine("from xml.dom import minidom");
+        generator.writeLine("from plp_monitors.srv import *");
+        generator.writeLine("import rospy");
         generator.newLine();
         generator.writeLine("# TODO update this variable to the max variable history needed");
         generator.writeLine(String.format("PLP_%s_HISTORY_LENGTH = 2",plp.getBaseName()));
@@ -53,6 +55,16 @@ public class PLPLogicGenerator {
         generator.indent();
 
         generator.writeIndentedBlock(generateCanEstimate(plp, generator.getCurrentTabLevel()));
+
+        if (plp.getRequiredResources().size()>0)
+        {
+            generator.newLine();
+            generator.writeLine("def check_resources_availble(self):");
+            generator.indent();
+            generator.writeLine("return self.request_resources(False)");
+            generator.dendent();
+        }
+
         generator.newLine();
         generator.writeLine("# The following methods are used to check the observable conditions of the PLP.");
         generator.writeLine("# Access parameters using: self.plp_params of type PLP_"
@@ -87,7 +99,32 @@ public class PLPLogicGenerator {
         generateEstimationFunctions(plp,generator);
         //
 
+        // resources
+        if (plp.getRequiredResources().size()>0) {
+            generator.writeLine("# Checks if resources is free");
+            generator.writeLine("def request_resources(self, release):");
+            generator.indent();
+            generator.writeLine("try:");
+            generator.indent();
+            generator.writeLine("resources_list = rospy.ServiceProxy('resources_list', Resources)");
+            String names = "[";
+            for (RequiredResource rq : plp.getRequiredResources()) {
+                names += "'" + rq.getName() + "',";
+            }
+            StringBuilder sb = new StringBuilder(names);
+            sb.delete(sb.length()-1,sb.length());
+            generator.writeLine("resp1 = resources_list(" + sb.toString() + "], release)");
+            generator.writeLine("return resp1.result");
+            generator.dendent();
+            generator.writeLine("except rospy.ServiceException, e:");
+            generator.indent();
+            generator.writeLine("print \"Service call failed: %s\" % e");
+            generator.dendent();
+            generator.dendent();
+        }
+
         // monitor termination
+        generator.newLine();
         generateTerminationDetectors(generator, plp, true);
         //
 
@@ -167,6 +204,22 @@ public class PLPLogicGenerator {
         }
         //
 
+        if (plp.getRequiredResources().size()>0)
+        {
+            List<String> names = new LinkedList<>();
+            for (RequiredResource rq : plp.getRequiredResources()) {
+                names.add(rq.getName());
+            }
+            generator.writeLine("def monitor_resources(self):");
+            generator.indent();
+            generator.writeLine("if not self.check_resources_availble():");
+            generator.indent();
+            generator.writeLine("self.callback.plp_monitor_message(PLPMonitorMessage(\"[" + names + " - robot_resources not free]\", False, \"" + names + " - robot_resources not free\"))");
+            generator.dendent();
+            generator.dendent();
+            generator.newLine();
+        }
+
         // variables
         generateVariablesFunctions(plp, generator, true);
         generator.newLine();
@@ -178,7 +231,11 @@ public class PLPLogicGenerator {
         generator.writeLine("# Called when parameters were updated (might affect variables)");
         generator.writeLine("# Triggers estimation and monitoring. You can uncomment one if you're not interested in it");
         generator.writeLine("termination = self.detect_termination()");
-        generator.writeLine("if termination is None:");
+        generator.writeLine("if termination == -1:");
+        generator.indent();
+        generator.writeLine("pass");
+        generator.dendent();
+        generator.writeLine("elif termination is None:");
         generator.indent();
         generator.writeLine("self.request_estimation()");
         generator.writeLine("self.monitor_conditions()");
@@ -188,7 +245,18 @@ public class PLPLogicGenerator {
         generator.dendent();
         generator.writeLine("else:");
         generator.indent();
+        if (plp.getRequiredResources().size()>0)
+        {
+            generator.writeLine("# open resources that was in use");
+            generator.writeLine("self.request_resources(True)");
+        }
+        generator.writeLine("try:");
+        generator.indent();
         generator.writeLine("self.callback.plp_terminated(termination)");
+        generator.dendent();
+        generator.writeLine("except Exception as e:");
+        generator.indent();
+        generator.writeLine("print \"Exception at parameters_updated: \" + str(e)");
         generator.dendent();
         generator.dendent();
         //
@@ -250,10 +318,15 @@ public class PLPLogicGenerator {
             generator.indent();
             generator.writeLine("# TODO Implement code to calculate "+var.getName());
             generator.writeLine("# return the value of the variable");
-            if (var.getInput()=="")
+            if (var.getInput().isEmpty())
                 generator.writeLine("return None");
-            else
-                generator.writeLine("return self.plp_params."+var.getInput());
+            else {
+                generator.writeLine("if self.plp_params." + var.getInput() + " is not None:");
+                generator.indent();
+                generator.writeLine("return self.plp_params." + var.getInput());
+                generator.dendent();
+                generator.writeLine("return False");
+            }
             generator.dendent();
             generator.newLine();
         }

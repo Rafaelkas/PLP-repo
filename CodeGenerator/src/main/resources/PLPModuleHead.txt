@@ -3,6 +3,7 @@
         self.callback = callback
         self.plp_params = parameters
         self.variables_history = list()
+        self.terminated = False
 
     def request_estimation(self):
         """
@@ -35,12 +36,17 @@
         See if any of the termination conditions applies.
         :return: A PLPTermination object, or None.
         """
+        if self.terminated:
+            return -1
+
         res = self.detect_success()
-        if not ( res is None ):
+        if not (res is None):
+            self.terminated = True
             return res
 
         res = self.detect_failures()
-        if not ( res is None ):
+        if not (res is None):
+            self.terminated = True
             return res
 
         return None
