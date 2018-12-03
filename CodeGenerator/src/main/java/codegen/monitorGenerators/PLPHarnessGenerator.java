@@ -31,7 +31,7 @@ public class PLPHarnessGenerator {
 
         generator.writeLine("#!/usr/bin/env python");
 //        generator.writeLine("import rospy");
-//        generator.writeLine("import sys");
+        generator.writeLine("import sys");
         generator.writeLine("import logging");
         generator.writeLine("import rosservice");
 //        generator.writeLine("from xml.dom import minidom");
@@ -52,7 +52,12 @@ public class PLPHarnessGenerator {
         generator.indent();
         generator.newLine();
         generateInitFunction(generator,plp);
-
+        generator.writeLine("rospy.wait_for_service('plp_list')");
+        generator.writeLine("if \"/plp_list\" in rosservice.get_service_list():");
+        generator.indent();
+        generator.writeLine(String.format("rospy.loginfo(\"<PLP:%s>: Service plp is up!\")", plp.getBaseName()));
+        generator.dendent();
+        generator.newLine();
         if (plp.getRequiredResources().size()>0) {
             generator.writeLine("rospy.wait_for_service('resources_list')");
             generator.writeLine("if \"/resources_list\" in rosservice.get_service_list():");
@@ -88,6 +93,7 @@ public class PLPHarnessGenerator {
         generator.writeLine(String.format("rospy.loginfo(\"<PLP:%s> trigger detected, starting \" + \"monitoring\" if self.monitor else \"capturing\")",plp.getBaseName()));
         generator.writeLine(String.format("self.plp = PLP_%s_logic(self.plp_constants, self.plp_params, self)",plp.getBaseName()));
         generator.writeLine("self.plp_params.callback = self.plp");
+        generator.writeLine("harness.plp.monitor_plp()");
         if (plp.getRequiredResources().size()>0)
         {
             generator.writeLine("harness.plp.monitor_resources()");

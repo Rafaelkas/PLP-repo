@@ -1,0 +1,4 @@
+string[] resource_name
+bool release
+---
+bool result

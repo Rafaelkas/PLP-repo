@@ -26,7 +26,8 @@ public class PLPLogicGenerator {
         generator.writeLine("from PLPClasses import *");
         generator.writeLine(String.format("from PLP_%s_classes import *",plp.getBaseName()));
         generator.writeLine("from xml.dom import minidom");
-        generator.writeLine("from plp_monitors.srv import *");
+        generator.writeLine("from plp_monitors.srv import Resources");
+        generator.writeLine("from plp_monitors.srv import Plp");
         generator.writeLine("import rospy");
         generator.newLine();
         generator.writeLine("# TODO update this variable to the max variable history needed");
@@ -59,11 +60,17 @@ public class PLPLogicGenerator {
         if (plp.getRequiredResources().size()>0)
         {
             generator.newLine();
-            generator.writeLine("def check_resources_availble(self):");
+            generator.writeLine("def check_resources_available(self):");
             generator.indent();
             generator.writeLine("return self.request_resources(False)");
             generator.dendent();
         }
+
+        generator.newLine();
+        generator.writeLine("def check_plp_available(self):");
+        generator.indent();
+        generator.writeLine("return self.request_plp(1)");
+        generator.dendent();
 
         generator.newLine();
         generator.writeLine("# The following methods are used to check the observable conditions of the PLP.");
@@ -74,6 +81,20 @@ public class PLPLogicGenerator {
         generator.writeLine("# Access variable history using: self.variables_history[index]");
         generator.write("# Access constants using: self.constants[constant_name]");
         generateAllConditionCheckers(generator, plp, true);
+
+        // check variables if none
+        generator.newLine();
+        generator.writeLine("def check_variable_not_none(self):");
+        generator.indent();
+        generator.writeLine("if self.variables() is not None:");
+        generator.indent();
+        generator.writeLine("return True");
+        generator.dendent();
+        generator.writeLine("else:");
+        generator.indent();
+        generator.writeLine("return False");
+        generator.dendent();
+        generator.dendent();
 
         // validate preconditions
         generator.newLine();
@@ -114,6 +135,22 @@ public class PLPLogicGenerator {
             StringBuilder sb = new StringBuilder(names);
             sb.delete(sb.length()-1,sb.length());
             generator.writeLine("resp1 = resources_list(" + sb.toString() + "], release)");
+            generator.writeLine("return resp1.result");
+            generator.dendent();
+            generator.writeLine("except rospy.ServiceException, e:");
+            generator.indent();
+            generator.writeLine("print \"Service call failed: %s\" % e");
+            generator.dendent();
+            generator.dendent();
+
+            generator.newLine();
+            generator.writeLine("# update that this plp is running");
+            generator.writeLine("def request_plp(self, count):");
+            generator.indent();
+            generator.writeLine("try:");
+            generator.indent();
+            generator.writeLine("plp_list = rospy.ServiceProxy('plp_list', Plp)");
+            generator.writeLine("resp1 = plp_list([" + "'" + plp.getBaseName() + "'" + "], count)");
             generator.writeLine("return resp1.result");
             generator.dendent();
             generator.writeLine("except rospy.ServiceException, e:");
@@ -212,9 +249,18 @@ public class PLPLogicGenerator {
             }
             generator.writeLine("def monitor_resources(self):");
             generator.indent();
-            generator.writeLine("if not self.check_resources_availble():");
+            generator.writeLine("if not self.check_resources_available():");
             generator.indent();
             generator.writeLine("self.callback.plp_monitor_message(PLPMonitorMessage(\"[" + names + " - robot_resources not free]\", False, \"" + names + " - robot_resources not free\"))");
+            generator.dendent();
+            generator.dendent();
+            generator.newLine();
+
+            generator.writeLine("def monitor_plp(self):");
+            generator.indent();
+            generator.writeLine("if not self.check_plp_available():");
+            generator.indent();
+            generator.writeLine("self.callback.plp_monitor_message(PLPMonitorMessage(\"" + plp.getBaseName()  + " - plp not free\", False, \"" + plp.getBaseName() + " - plp not free\"))");
             generator.dendent();
             generator.dendent();
             generator.newLine();
@@ -250,6 +296,7 @@ public class PLPLogicGenerator {
             generator.writeLine("# open resources that was in use");
             generator.writeLine("self.request_resources(True)");
         }
+        generator.writeLine("self.request_plp(-1)");
         generator.writeLine("try:");
         generator.indent();
         generator.writeLine("self.callback.plp_terminated(termination)");
@@ -321,11 +368,11 @@ public class PLPLogicGenerator {
             if (var.getInput().isEmpty())
                 generator.writeLine("return None");
             else {
-                generator.writeLine("if self.plp_params." + var.getInput() + " is not None:");
-                generator.indent();
+//                generator.writeLine("if self.plp_params." + var.getInput() + " is not None:");
+//                generator.indent();
                 generator.writeLine("return self.plp_params." + var.getInput());
-                generator.dendent();
-                generator.writeLine("return False");
+//                generator.dendent();
+//                generator.writeLine("return False");
             }
             generator.dendent();
             generator.newLine();
@@ -986,6 +1033,12 @@ public class PLPLogicGenerator {
                         generator.writeLine("expr1 = False");
                     else
                         generator.writeLine("# make sure that variable is not None");
+                        generator.writeLine("if not self.check_variable_not_none():");
+                        generator.indent();
+                        generator.writeLine("return False");
+                        generator.dendent();
+                        generator.writeLine("else:");
+                        generator.indent();
                         if (isMeasure && rightExpr == null) {
                             generator.writeLine(leftExpr + " = abs(self.variables()." + leftExpr +")");
                             generator.writeLine("expr1 = "+ leftExpr + " - self.last_" + keyDesc);
@@ -1025,6 +1078,7 @@ public class PLPLogicGenerator {
                             generator.writeLine("return "+formula.getRange().getMinValue()+" <= expr1 <= "+formula.getRange().getMaxValue() );
                         }
                     }
+                    generator.dendent();
                 } else if (QuantifiedCondition.class.isInstance(entry.getKey())) {
                     QuantifiedCondition qCond = (QuantifiedCondition) entry.getKey();
                     generateQuantifiedCode(generator, qCond);

@@ -5,6 +5,8 @@ import codegen.monitorGenerators.PLPClassesGenerator;
 import codegen.monitorGenerators.PLPHarnessGenerator;
 import codegen.monitorGenerators.PLPLaunchGenerator;
 import codegen.monitorGenerators.PLPLogicGenerator;
+import codegen.monitorGenerators.PLPPlpGenerator;
+import codegen.monitorGenerators.PLPResourcesGenerator;
 import fr.uga.pddl4j.parser.Domain;
 import fr.uga.pddl4j.parser.Op;
 import fr.uga.pddl4j.parser.Parser;
@@ -14,12 +16,15 @@ import modules.AchievePLP;
 import modules.DetectPLP;
 import modules.MaintainPLP;
 import modules.ObservePLP;
+import plpFields.RequiredResource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class CodeGenerator {
 
@@ -49,28 +54,34 @@ public class CodeGenerator {
             generateROSPackage(path);
 
             copyResourceFile("PLPClasses.py",path+packageName+pathBreak+"scripts"+pathBreak);
-            copyResourceFile("PLP_resources_server.py",path+packageName+pathBreak+"scripts"+pathBreak);
-            copyResourceFile("list.txt",path+packageName+pathBreak+"scripts"+pathBreak);
-            List<String> namesForLaunch = new LinkedList<>();;
+            copyResourceFile("PLP_resources_service.py",path+packageName+pathBreak+"scripts"+pathBreak);
+            copyResourceFile("PLP_plp_service.py",path+packageName+pathBreak+"scripts"+pathBreak);
+            Map<String,List<String>> temp = new HashMap<>();
             for (AchievePLP aPLP : PLPLoader.getAchievePLPs()) {
-                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(aPLP, path));
+                temp.putAll(CodeGenerator.GenerateMonitoringScripts(aPLP, path));
             }
             for (MaintainPLP mPLP : PLPLoader.getMaintainPLPs()) {
-                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(mPLP, path));
+                temp.putAll(CodeGenerator.GenerateMonitoringScripts(mPLP, path));
             }
             for (ObservePLP oPLP : PLPLoader.getObservePLPs()) {
-                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(oPLP, path));
+                temp.putAll(CodeGenerator.GenerateMonitoringScripts(oPLP, path));
             }
             for (DetectPLP dPLP : PLPLoader.getDetectPLPs()) {
-                namesForLaunch.add(CodeGenerator.GenerateMonitoringScripts(dPLP, path));
+                temp.putAll(CodeGenerator.GenerateMonitoringScripts(dPLP, path));
             }
 
-            String PLPLaunchFile = PLPLaunchGenerator.GenerateLaunchFile(namesForLaunch);
+            String PLPLaunchFile = PLPLaunchGenerator.GenerateLaunchFile(temp);
+            String PLPResourcesFile = PLPResourcesGenerator.GenerateResourcesFile(temp);
+            String PLPPlpFile = PLPPlpGenerator.GeneratePlpFile(temp);
+
             writeStringToFile(PLPLaunchFile, path+packageName+pathBreak+"launch"+pathBreak+"plp.launch");
+            writeStringToFile(PLPResourcesFile, path+packageName+pathBreak+"scripts"+pathBreak+"resources.txt");
+            writeStringToFile(PLPPlpFile, path+packageName+pathBreak+"scripts"+pathBreak+"plp.txt");
             generateCMakeLists(path+packageName, true);
             generatePackageXMLFile(path+packageName, true);
             copyResourceFile("PLPMessage.msg", path+packageName+pathBreak+"msg"+pathBreak);
             copyResourceFile("Resources.srv",path+packageName+pathBreak+"srv"+pathBreak);
+            copyResourceFile("Plp.srv",path+packageName+pathBreak+"srv"+pathBreak);
         }
         else if (args.length > 3 && args[0].equals("-dispatcher")) {
             String plpPath = args[2];
@@ -207,7 +218,7 @@ public class CodeGenerator {
         launch.mkdir();
     }
 
-    public static String GenerateMonitoringScripts(PLP plp, String path) {
+    public static Map<String, List<String>> GenerateMonitoringScripts(PLP plp, String path) {
         String PLPClasses = PLPClassesGenerator.GeneratePLPClasses(plp, true);
         String PLPModule = PLPLogicGenerator.GeneratePLPModule(plp);
         String PLPHarness = PLPHarnessGenerator.GeneratePLPHarness(plp, path);
@@ -218,7 +229,13 @@ public class CodeGenerator {
 
         writeStringToFile(PLPHarness, path+packageName+pathBreak+"scripts"+pathBreak+"PLP_"+plp.getBaseName()+"_ros_harness.py");
 
-        return plp.getBaseName();
+        Map<String,List<String>> values = new HashMap<String,List<String>>();
+        List<String> names = new LinkedList<>();
+        for (RequiredResource rq : plp.getRequiredResources()) {
+            names.add(rq.getName());
+        }
+        values.put(plp.getBaseName(),names);
+        return values;
     }
 
     private static void writeStringToFile(String string, String fullPath) {
