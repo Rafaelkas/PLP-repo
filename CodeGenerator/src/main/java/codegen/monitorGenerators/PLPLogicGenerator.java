@@ -296,6 +296,7 @@ public class PLPLogicGenerator {
             generator.writeLine("# open resources that was in use");
             generator.writeLine("self.request_resources(True)");
         }
+        generator.writeLine("# release this plp");
         generator.writeLine("self.request_plp(-1)");
         generator.writeLine("try:");
         generator.indent();
